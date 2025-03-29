@@ -27,6 +27,7 @@ import { logStore } from '~/lib/stores/logs';
 import { streamingState } from '~/lib/stores/streaming';
 import { filesToArtifacts } from '~/utils/fileUtils';
 import { supabaseConnection } from '~/lib/stores/supabase';
+import { convexProjectConnected, convexProjectToken } from '~/lib/stores/convex';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -125,6 +126,8 @@ export const ChatImpl = memo(
     const files = useStore(workbenchStore.files);
     const actionAlert = useStore(workbenchStore.alert);
     const supabaseConn = useStore(supabaseConnection); // Add this line to get Supabase connection
+    const projectToken = useStore(convexProjectToken);
+    const convexConnected = useStore(convexProjectConnected);
     const selectedProject = supabaseConn.stats?.projects?.find(
       (project) => project.id === supabaseConn.selectedProjectId,
     );
@@ -173,6 +176,10 @@ export const ChatImpl = memo(
             supabaseUrl: supabaseConn?.credentials?.supabaseUrl,
             anonKey: supabaseConn?.credentials?.anonKey,
           },
+        },
+        convex: {
+          isConnected: convexConnected,
+          projectToken,
         },
       },
       sendExtraMessageFields: true,

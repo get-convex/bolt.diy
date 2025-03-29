@@ -13,6 +13,10 @@ export interface PromptOptions {
       supabaseUrl?: string;
     };
   };
+  convex: {
+    isConnected: boolean;
+    projectToken: string | null;
+  };
 }
 
 export class PromptLibrary {
@@ -27,7 +31,7 @@ export class PromptLibrary {
     default: {
       label: 'Default Prompt',
       description: 'This is the battle tested default system Prompt',
-      get: (options) => getSystemPrompt(options.cwd, options.supabase),
+      get: (options) => getSystemPrompt(options.cwd, options.supabase, options.convex),
     },
     optimized: {
       label: 'Optimized Prompt (experimental)',

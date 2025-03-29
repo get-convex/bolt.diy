@@ -1,6 +1,7 @@
 import { classNames } from '~/utils/classNames';
 import { useState, useEffect } from 'react';
 import { convexProjectConnected, convexProjectToken } from '~/lib/stores/convex';
+import { useStore } from '@nanostores/react';
 
 // The Convex OAuth App which is allowed to use the callbacks
 const CLIENT_ID = '855ec8198b9c462d';
@@ -33,9 +34,9 @@ export function ConvexConnectButton() {
       state,
     });
 
-    const authUrl = `https://dashboard.convex.dev/oauth/authorize/project?${params.toString()}`;
-
-    window.open(authUrl, 'ConvexAuth', 'width=600,height=600,top=200,left=200');
+    // Open our loading page first, which will then redirect to Convex
+    const connectUrl = `/convex/connect?${params.toString()}`;
+    window.open(connectUrl, 'ConvexAuth', 'width=600,height=600,top=200,left=200');
 
     // Poll for token in local storage because COOP + COEP headers make postMessage more involved.
     const interval = setInterval(() => {
@@ -54,14 +55,16 @@ export function ConvexConnectButton() {
     setPollInterval(interval);
   };
 
+  const isReconnecting = useStore(convexProjectConnected);
+
   return (
     <button
       onClick={handleOAuthClick}
       disabled={isLoading}
       className={classNames(
         'px-4 py-2 rounded-lg text-sm flex items-center gap-2',
-        'bg-[#3ECF8E] text-white',
-        'hover:bg-[#3BBF84]',
+        'bg-[#8B5CF6] text-white',
+        'hover:bg-[#7C3AED]',
         'disabled:opacity-50 disabled:cursor-not-allowed',
       )}
     >
@@ -73,7 +76,7 @@ export function ConvexConnectButton() {
       ) : (
         <>
           <div className="i-ph:plug-charging w-4 h-4" />
-          Connect Project
+          {isReconnecting ? 'Connect a different project' : 'Connect'}
         </>
       )}
     </button>

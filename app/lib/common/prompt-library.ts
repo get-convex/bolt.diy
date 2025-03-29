@@ -5,6 +5,10 @@ export interface PromptOptions {
   cwd: string;
   allowedHtmlElements: string[];
   modificationTagName: string;
+  convex: {
+    isConnected: boolean;
+    projectToken: string | null;
+  };
 }
 
 export class PromptLibrary {

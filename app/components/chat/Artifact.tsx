@@ -8,6 +8,9 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { classNames } from '~/utils/classNames';
 import { cubicEasingFn } from '~/utils/easings';
 import { WORK_DIR } from '~/utils/constants';
+import { convexStore } from '~/lib/stores/convex';
+import { ConvexConnectAlert } from '~/components/convex/ConvexConnectAlert';
+import { ConvexDeployTerminal } from '~/components/convex/ConvexDeployTerminal';
 
 const highlighterOptions = {
   langs: ['shell'],
@@ -161,6 +164,9 @@ function openArtifactInWorkbench(filePath: any) {
 }
 
 const ActionList = memo(({ actions }: ActionListProps) => {
+  const convexProject = useStore(convexStore);
+  const isConvexConnected = convexProject !== null;
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
       <ul className="list-none space-y-2.5">
@@ -211,6 +217,10 @@ const ActionList = memo(({ actions }: ActionListProps) => {
                   <div className="flex items-center w-full min-h-[28px]">
                     <span className="flex-1">Run command</span>
                   </div>
+                ) : type === 'convex' ? (
+                  <div className="flex items-center w-full min-h-[28px]">
+                    <span className="flex-1">Deploy Convex functions</span>
+                  </div>
                 ) : type === 'start' ? (
                   <a
                     onClick={(e) => {
@@ -230,6 +240,12 @@ const ActionList = memo(({ actions }: ActionListProps) => {
                   })}
                   code={content}
                 />
+              )}
+
+              {type === 'convex' && action.status === 'running' && !isConvexConnected && <ConvexConnectAlert />}
+
+              {type === 'convex' && action.status !== 'complete' && action.output && (
+                <ConvexDeployTerminal input={action.output ?? ''} />
               )}
             </motion.li>
           );

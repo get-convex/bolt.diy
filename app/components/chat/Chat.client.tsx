@@ -26,6 +26,7 @@ import { getTemplates, selectStarterTemplate } from '~/utils/selectStarterTempla
 import { logStore } from '~/lib/stores/logs';
 import { streamingState } from '~/lib/stores/streaming';
 import { filesToArtifacts } from '~/utils/fileUtils';
+import { convexStore } from '~/lib/stores/convex';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -123,6 +124,7 @@ export const ChatImpl = memo(
     const [fakeLoading, setFakeLoading] = useState(false);
     const files = useStore(workbenchStore.files);
     const actionAlert = useStore(workbenchStore.alert);
+    const convexProject = useStore(convexStore);
     const { activeProviders, promptId, autoSelectTemplate, contextOptimizationEnabled } = useSettings();
 
     const [model, setModel] = useState(() => {
@@ -160,6 +162,10 @@ export const ChatImpl = memo(
         files,
         promptId,
         contextOptimization: contextOptimizationEnabled,
+        convex: {
+          isConnected: convexProject !== null,
+          projectToken: convexProject?.token,
+        },
       },
       sendExtraMessageFields: true,
       onError: (e) => {

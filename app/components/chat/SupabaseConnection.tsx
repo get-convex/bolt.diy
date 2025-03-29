@@ -77,7 +77,7 @@ export function SupabaseConnection() {
 
   return (
     <div className="relative">
-      <div className="flex border border-bolt-elements-borderColor rounded-md overflow-hidden mr-2 text-sm">
+      <div className="flex border border-bolt-elements-borderColor rounded-md overflow-hidden text-sm">
         <Button
           active
           disabled={connecting}

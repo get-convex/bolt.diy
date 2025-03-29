@@ -37,7 +37,7 @@ function parseCookies(cookieHeader: string): Record<string, string> {
 }
 
 async function chatAction({ context, request }: ActionFunctionArgs) {
-  const { messages, files, promptId, contextOptimization, supabase } = await request.json<{
+  const { messages, files, promptId, contextOptimization, supabase, convex } = await request.json<{
     messages: Messages;
     files: any;
     promptId?: string;
@@ -49,6 +49,10 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
         anonKey?: string;
         supabaseUrl?: string;
       };
+    };
+    convex?: {
+      isConnected: boolean;
+      projectToken: string | undefined;
     };
   }>();
 
@@ -189,6 +193,8 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
 
         const options: StreamingOptions = {
           supabaseConnection: supabase,
+          convexProjectConnected: !!convex?.isConnected,
+          convexProjectToken: convex?.projectToken || null,
           toolChoice: 'none',
           onFinish: async ({ text: content, finishReason, usage }) => {
             logger.debug('usage', JSON.stringify(usage));

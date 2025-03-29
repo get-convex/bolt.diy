@@ -38,6 +38,7 @@ import type { ActionRunner } from '~/lib/runtime/action-runner';
 import { LOCAL_PROVIDERS } from '~/lib/stores/settings';
 import { SupabaseChatAlert } from '~/components/chat/SupabaseAlert';
 import { SupabaseConnection } from './SupabaseConnection';
+import { ConvexConnection } from './ConvexConnection';
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -606,7 +607,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           a new line
                         </div>
                       ) : null}
-                      <SupabaseConnection />
+                      <div className="flex gap-2">
+                        <SupabaseConnection />
+                        <ConvexConnection />
+                      </div>
                     </div>
                   </div>
                 </div>

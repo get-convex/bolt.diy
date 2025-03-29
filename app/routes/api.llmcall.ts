@@ -59,6 +59,8 @@ async function llmCallAction({ context, request }: ActionFunctionArgs) {
       const result = await streamText({
         options: {
           system,
+          convexProjectConnected: false,
+          convexProjectToken: null,
         },
         messages: [
           {

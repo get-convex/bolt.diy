@@ -2,16 +2,13 @@ import { classNames } from '~/utils/classNames';
 import { useState, useEffect } from 'react';
 import { convexProjectConnected, convexProjectToken } from '~/lib/stores/convex';
 
+// The Convex OAuth App which is allowed to use the callbacks
 const CLIENT_ID = '855ec8198b9c462d';
 
-/**
- * OAuth button component for connecting to Convex.
- */
 export function ConvexConnectButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [pollInterval, setPollInterval] = useState<NodeJS.Timeout | null>(null);
 
-  // Cleanup polling on unmount
   useEffect(() => {
     return () => {
       if (pollInterval) {
@@ -21,54 +18,40 @@ export function ConvexConnectButton() {
   }, [pollInterval]);
 
   const handleOAuthClick = async () => {
-    console.log('Starting OAuth flow...');
     setIsLoading(true);
 
-    try {
-      const state = JSON.stringify({
-        random: Math.random().toString(36).substring(2),
-        extraState: 1,
-      });
-      localStorage.setItem('convexOAuthState', state);
+    const state = JSON.stringify({
+      random: Math.random().toString(36).substring(2),
+      extraState: 1,
+    });
+    localStorage.setItem('convexOAuthState', state);
 
-      const params = new URLSearchParams({
-        client_id: CLIENT_ID,
-        redirect_uri: window.location.origin + '/convex/callback',
-        response_type: 'code',
-        state,
-      });
+    const params = new URLSearchParams({
+      client_id: CLIENT_ID,
+      redirect_uri: window.location.origin + '/convex/callback',
+      response_type: 'code',
+      state,
+    });
 
-      const authUrl = `https://dashboard.convex.dev/oauth/authorize/project?${params.toString()}`;
-      console.log('Opening auth popup:', authUrl);
+    const authUrl = `https://dashboard.convex.dev/oauth/authorize/project?${params.toString()}`;
 
-      // Open popup
-      window.open(authUrl, 'ConvexAuth', 'width=800,height=600');
+    window.open(authUrl, 'ConvexAuth', 'width=600,height=600,top=200,left=200');
 
-      // Start polling for token
-      const interval = setInterval(() => {
-        const token = localStorage.getItem('convexProjectToken');
+    // Poll for token in local storage because COOP + COEP headers make postMessage more involved.
+    const interval = setInterval(() => {
+      const token = localStorage.getItem('convexProjectToken');
 
-        if (token) {
-          console.log('we got it!');
-          clearInterval(interval);
-          setPollInterval(null);
-          setIsLoading(false);
-          convexProjectConnected.set(true);
-          convexProjectToken.set(token);
-          localStorage.removeItem('convexProjectToken');
-        }
-      }, 500);
-
-      setPollInterval(interval);
-    } catch (error) {
-      console.error('Error initiating OAuth flow:', error);
-      setIsLoading(false);
-
-      if (pollInterval) {
-        clearInterval(pollInterval);
+      if (token) {
+        clearInterval(interval);
         setPollInterval(null);
+        setIsLoading(false);
+        convexProjectConnected.set(true);
+        convexProjectToken.set(token);
+        localStorage.removeItem('convexProjectToken');
       }
-    }
+    }, 500);
+
+    setPollInterval(interval);
   };
 
   return (

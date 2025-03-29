@@ -38,18 +38,20 @@ interface WorkspaceProps {
 const viewTransition = { ease: cubicEasingFn };
 
 const sliderOptions: SliderOptions<WorkbenchViewType> = {
-  left: {
-    value: 'code',
-    text: 'Code',
-  },
-  middle: {
-    value: 'diff',
-    text: 'Diff',
-  },
-  right: {
-    value: 'preview',
-    text: 'Preview',
-  },
+  options: [
+    {
+      value: 'code',
+      text: 'Code',
+    },
+    {
+      value: 'diff',
+      text: 'Diff',
+    },
+    {
+      value: 'preview',
+      text: 'Preview',
+    },
+  ],
 };
 
 const workbenchVariants = {
@@ -418,7 +420,7 @@ export const Workbench = memo(
                   />
                 </div>
                 <div className="relative flex-1 overflow-hidden">
-                  <View initial={{ x: '0%' }} animate={{ x: selectedView === 'code' ? '0%' : '-100%' }}>
+                  <View {...slidingPosition({ view: 'code', selectedView })}>
                     <EditorPanel
                       editorDocument={currentDocument}
                       isStreaming={isStreaming}
@@ -433,13 +435,10 @@ export const Workbench = memo(
                       onFileReset={onFileReset}
                     />
                   </View>
-                  <View
-                    initial={{ x: '100%' }}
-                    animate={{ x: selectedView === 'diff' ? '0%' : selectedView === 'code' ? '100%' : '-100%' }}
-                  >
+                  <View {...slidingPosition({ view: 'diff', selectedView })}>
                     <DiffView fileHistory={fileHistory} setFileHistory={setFileHistory} actionRunner={actionRunner} />
                   </View>
-                  <View initial={{ x: '100%' }} animate={{ x: selectedView === 'preview' ? '0%' : '100%' }}>
+                  <View {...slidingPosition({ view: 'preview', selectedView })}>
                     <Preview />
                   </View>
                 </div>
@@ -489,3 +488,23 @@ const View = memo(({ children, ...props }: ViewProps) => {
     </motion.div>
   );
 });
+
+function slidingPosition({
+  view,
+  selectedView,
+}: {
+  view: WorkbenchViewType;
+  selectedView: WorkbenchViewType;
+}): Partial<ViewProps> {
+  const tabsInOrder: WorkbenchViewType[] = ['code', 'diff', 'preview'];
+
+  const viewIndex = tabsInOrder.indexOf(view);
+  const selectedViewIndex = tabsInOrder.indexOf(selectedView);
+
+  const position = { x: `${(viewIndex - selectedViewIndex) * 100}%` };
+
+  return {
+    initial: position,
+    animate: position,
+  };
+}

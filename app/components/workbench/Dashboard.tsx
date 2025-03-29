@@ -1,15 +1,23 @@
+import { useStore } from '@nanostores/react';
 import { memo, useEffect, useRef } from 'react';
-
-// TODO Link it to the real deployment
+import { convexProjectToken, convexProjectDeploymentUrl, convexProjectDeploymentName } from '~/lib/stores/convex';
 
 export const Dashboard = memo(() => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const url = 'https://static-dashboard-beta.vercel.app';
+  const deploymentUrl = useStore(convexProjectDeploymentUrl);
+  const token = useStore(convexProjectToken);
+  const deploymentName = useStore(convexProjectDeploymentName);
+
+  const url = deploymentUrl ? 'https://dashboard-embedded.convex.dev' : null;
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      if (!deploymentUrl || !token || !deploymentName) {
+        return;
+      }
+
       if (event.data?.type === 'dashboard-credentials-request') {
         return;
       }
@@ -23,9 +31,9 @@ export const Dashboard = memo(() => {
       iframeRef.current.contentWindow?.postMessage(
         {
           type: 'dashboard-credentials',
-          adminKey: 'testAdminKey',
-          deploymentUrl: 'https://secret-panda-824.convex.cloud',
-          deploymentName: '',
+          adminKey: token,
+          deploymentUrl,
+          deploymentName,
         },
         '*',
       );
@@ -34,7 +42,7 @@ export const Dashboard = memo(() => {
     window.addEventListener('message', handleMessage);
 
     return () => window.removeEventListener('message', handleMessage);
-  }, []);
+  }, [deploymentUrl, token, deploymentName]);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -48,7 +56,7 @@ export const Dashboard = memo(() => {
       </div>
       <div className="flex-1 border-t border-bolt-elements-borderColor">
         {url !== null ? (
-          <iframe ref={iframeRef} className="border-none w-full h-full bg-white" src={url} />
+          <iframe ref={iframeRef} className="border-none w-full h-full bg-white" src={url} sandbox="allow-scripts" />
         ) : (
           <div className="flex w-full h-full justify-center items-center bg-white">
             No dashboard has been loaded so far

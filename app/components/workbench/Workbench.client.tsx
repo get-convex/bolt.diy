@@ -24,6 +24,7 @@ import { EditorPanel } from './EditorPanel';
 import { Preview } from './Preview';
 import useViewport from '~/lib/hooks';
 import { PushToGitHubDialog } from '~/components/@settings/tabs/connections/components/PushToGitHubDialog';
+import { Dashboard } from './Dashboard';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
@@ -50,6 +51,10 @@ const sliderOptions: SliderOptions<WorkbenchViewType> = {
     {
       value: 'preview',
       text: 'Preview',
+    },
+    {
+      value: 'dashboard',
+      text: 'Dashboard',
     },
   ],
 };
@@ -441,6 +446,9 @@ export const Workbench = memo(
                   <View {...slidingPosition({ view: 'preview', selectedView })}>
                     <Preview />
                   </View>
+                  <View {...slidingPosition({ view: 'dashboard', selectedView })}>
+                    <Dashboard />
+                  </View>
                 </div>
               </div>
             </div>
@@ -496,7 +504,7 @@ function slidingPosition({
   view: WorkbenchViewType;
   selectedView: WorkbenchViewType;
 }): Partial<ViewProps> {
-  const tabsInOrder: WorkbenchViewType[] = ['code', 'diff', 'preview'];
+  const tabsInOrder: WorkbenchViewType[] = ['code', 'diff', 'preview', 'dashboard'];
 
   const viewIndex = tabsInOrder.indexOf(view);
   const selectedViewIndex = tabsInOrder.indexOf(selectedView);

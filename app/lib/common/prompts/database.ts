@@ -17,68 +17,30 @@ export function databaseInstructions(options: {
   const { supabase, convex } = options;
   console.log(options);
 
+  let dbPrompt = `<database_instructions>`;
+
   if (convex?.isConnected) {
     console.log('using Convex DB instructions!');
-    return `<database_instructions>
-There is a Convex project already created that may be useful for this task.
+    dbPrompt += `
+There is a Convex project already provisioned that may be useful for this task.
 
-If there's any reason to persist data or run functions on it, Convex is the way to go! Install it with \`npm i convex@1.21.1-alpha.0\` and after any change made, run it with \`npx convex dev --once\` to deploy the code.
+If there's any reason to persist data or run functions on it, Convex is the way to go! Install it with \`npm i convex@1.21.1-alpha.0 --force\` and after any change made, run it with \`npx convex dev --once\` to deploy the code.
 
 If one does not exist, create a .env.local file containing at least this line:
 CONVEX_DEPLOY_KEY="${convex.projectToken}"
 
-To install convex, run \`npm i convex\`. The client is included in that package, imported like
+The Convex client bindings are included in the 'convex' package, importable from 'convex/react' or 'convex/browser' (for non-React webapps).
 
-Running \`npx convex dev --once\` creates a convex directory, and then all you need to do is
+Running \`npx convex dev --once\` creates a convex directory, and then you can build a normal convex app (a schema, queries, actions, mutations, etc.)
 
-1. aad a schema file in the convex directory, like this (just an example)
+After you create these files, you'll want to run \`npx convex dev --once\` again to deploy that code.
+Whenver you stop one long-running comand in the terminal (typically \`npm run dev\`) in order to run another command,
+be sure to rerun that command once the other command is finished. This is important so the developer can keep seeing
+their app!
 
-\`\`\`
-import { defineSchema, defineTable } from "convex/server";
-import { v } from "convex/values";
-
-export default defineSchema({
-  channels: defineTable({
-    name: v.string(),
-  }),
-
-  users: defineTable({
-    name: v.string(),
-  }),
-
-  messages: defineTable({
-    channelId: v.id("channels"),
-    authorId: v.optional(v.id("users")),
-    content: v.string(),
-  }).index("by_channel", ["channelId"]),
-\`\`\`
-
-and then write convex queries, actions, or mutations like these in a file like convex/messages.ts
+If you're using Convex in a React app, use the hooks imported from "convex/react" to call these convex functions like this:
 
 \`\`\`
-import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
-
-export const list = query({
-  handler: async (ctx) => {
-    return await ctx.db.query("messages").collect();
-  },
-});
-
-export const send = mutation({
-  args: { body: v.string(), author: v.string() },
-  handler: async (ctx, { body, author }) => {
-    const message = { body, author };
-    await ctx.db.insert("messages", message);
-  },
-});
-\`\`\`
-
-
-Then if you're using React, use the hooks imported from "convex/react" to call these convex functions, like this:
-
-\`\`\`
-
 import React, { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
@@ -124,12 +86,10 @@ export default function App() {
 \`\`\`
 
 ${convexGuidelines}
-
-</database_instructions>`;
-  } else {
-    console.log('using Supabase DB instructions :(');
-    return `<database_instructions>
-  The following instructions guide how you should handle database operations in projects.
+`;
+  } else if (supabase?.isConnected) {
+    console.log('using Supabase DB instructions');
+    dbPrompt += `The following instructions guide how you should handle database operations in projects.
 
   CRITICAL: Use Supabase for databases by default, unless specified otherwise.
 
@@ -322,7 +282,19 @@ ${convexGuidelines}
     - Use strong typing for all database operations
     - Maintain type safety throughout the application
 
-  IMPORTANT: NEVER skip RLS setup for any table. Security is non-negotiable!
-</database_instructions>`;
+  IMPORTANT: NEVER skip RLS setup for any table. Security is non-negotiable!`;
+  } else {
+    console.log('using generic DB instructions');
+    dbPrompt += `There is no database the user has specified yet, but in this environment you are limited to Supabase or Convex.
+    
+  If you need to persist data, run scheduled functions, query data, or subscribe to updates, ask the user to connect to one of these.
+  Prefer Convex unless the user asks for Supabase.
+
+  Instruct the user to connect to either of these by clicking the corresponding buttons they can see below the chat box.`;
   }
+
+  dbPrompt += `
+</database_instructions>`;
+
+  return dbPrompt;
 }

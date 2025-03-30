@@ -1,7 +1,7 @@
 import type { WebContainer } from '@webcontainer/api';
 import { path as nodePath } from '~/utils/path';
 import { atom, map, type MapStore } from 'nanostores';
-import type { ActionAlert, BoltAction, FileHistory } from '~/types/actions';
+import type { ActionAlert, BoltAction, ConvexConnectAction, FileHistory } from '~/types/actions';
 import { createScopedLogger } from '~/utils/logger';
 import { unreachable } from '~/utils/unreachable';
 import type { ActionCallbackData } from './message-parser';
@@ -155,6 +155,11 @@ export class ActionRunner {
         }
         case 'file': {
           await this.#runFileAction(action);
+          break;
+        }
+        case 'convex': {
+          console.log('CONVEX ACIOTN!!!!!!!');
+          await this.#runConvexAction(action);
           break;
         }
         case 'build': {
@@ -312,6 +317,16 @@ export class ActionRunner {
     const actions = this.actions.get();
 
     this.actions.setKey(id, { ...actions[id], ...newState });
+  }
+
+  async #runConvexAction(action: ConvexConnectAction) {
+    console.log('runConvexAction');
+    this.onAlert?.({
+      content: 'Please connect Convex',
+      description: 'Click the little button!',
+      title: 'COnvex!',
+      type: 'asd',
+    });
   }
 
   async getFileHistory(filePath: string): Promise<FileHistory | null> {

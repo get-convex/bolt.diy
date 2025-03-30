@@ -23,7 +23,11 @@ export interface BuildAction extends BaseAction {
   type: 'build';
 }
 
-export type BoltAction = FileAction | ShellAction | StartAction | BuildAction;
+export interface ConvexConnectAction extends BaseAction {
+  type: 'convex';
+}
+
+export type BoltAction = FileAction | ShellAction | StartAction | BuildAction | ConvexConnectAction;
 
 export type BoltActionData = BoltAction | BaseAction;
 

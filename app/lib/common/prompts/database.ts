@@ -1,4 +1,4 @@
-import { convexGuidelines } from './convex';
+//import { convexGuidelines } from './convex';
 
 export function databaseInstructions(options: {
   convex?: {
@@ -7,45 +7,52 @@ export function databaseInstructions(options: {
   };
 }): string {
   const { convex } = options;
+  let dbPrompt = `<database_instructions>
+`;
 
-  /*
-   *dbPrompt +=
-   */
+  if (convex?.isConnected) {
+    dbPrompt += `If there's any reason to persist data or run functions on a server, Convex is the way to go!
 
-  const dbPrompt = `<database_instructions>
+There is a Convex project already provisioned and connected to this project.
 
-
-  ${
-    convex?.isConnected
-      ? `
-There is a Convex project already provisioned that may be useful for this task.
-
-If there's any reason to persist data or run functions on it, Convex is the way to go! Install it with \`npm i convex@1.21.1-alpha.0 --force\` and after any change made to code in the convex directory or the first time after the CONVEX_DEPLOY_KEY has been added to the .env.local file, run it with \`npx convex dev --once\` to deploy the code.
-
-If one does not exist, create a .env.local file containing at least this line:
+If it hasn't been installed, install it with \`npm i convex@1.21.1-alpha.0 --force\`.
+If a .env.local file does not exist, it a file there containing at least this line:
 CONVEX_DEPLOY_KEY="${convex.projectToken}"
 
 If a .env.local file does exist, you'll still need to add the line
 CONVEX_DEPLOY_KEY="${convex.projectToken}"
 
-and you'll also need to run \`npx convex dev --once\` to complete the setup: automatically adding an enironment variable like VITE_CONVEX_URL.
+and you'll also need to run \`npx convex dev --once\` to complete the setup: automatically adding an environment variable like VITE_CONVEX_URL.
 
-If the user says they just connected a deployment, that's a good time to add that CONVEX_DEPLOY_KEY="${convex.projectToken}" line to the .env.local and run \`npx convex dev --once\`.
-`
-      : `There is no database the user has specified yet, but the user can use Convex in this environment.
+After any change made to code in the convex directory or the first time after the CONVEX_DEPLOY_KEY has been added to the .env.local file,
+run it with \`npx convex dev --once\` to deploy the code.\`.
+
+`;
+  } else {
+    dbPrompt += `
+    You can use Convex in this environment, but there is no convex project connected yet.
 
 If you need to persist data, run scheduled functions, query data, or subscribe to updates, ask the user to connect to a Convex deployment.
 
 If you need to install it, install with \`npm i convex@1.21.1-alpha.0 --force\` since 1.21.1-alpha.0 is a version known to work with this environment.
-You can start to build an app with it if you like, but the user hasn't connected the deployment yet so nothing will work yet.
 
-Instruct the user to connect to either of these by clicking the corresponding buttons they can see below the chat box.
+IMPORTANT: Don't write any Convex code until the user has connected a project!
 
-IMPORTANT: Convex cannot be used
-`
+Instead, suggest Convex and send something like this boltAction of type convex-connect.
+
+<boltArtifact>
+  <boltAction type="convex-connect">
+  </boltAction>
+</boltArtifact>
+
+You'll receive more instructions once the user has connected their Convex project
+so there's no need to take further action now.
+
+`;
   }
 
-The Convex client bindings are included in the 'convex' package, importable from 'convex/react' or 'convex/browser' (for non-React webapps).
+  if (convex?.isConnected) {
+    dbPrompt += ` The Convex client bindings are included in the 'convex' package, importable from 'convex/react' or 'convex/browser' (for non-React webapps).
 
 Running \`npx convex dev --once\` creates a convex directory, and then you can build a normal convex app (a schema, queries, actions, mutations, etc.)
 
@@ -106,10 +113,15 @@ export default function App() {
 
 The import path to import \`api\` from depends on the location of the file this codes written in (it's a relative path import).
 
-${convexGuidelines}
 
+`;
+  }
 
-</database_instructions>`;
+  dbPrompt += `</database_instructions>`;
 
   return dbPrompt;
 }
+
+/*
+${convexGuidelines}
+*/

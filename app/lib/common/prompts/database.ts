@@ -30,23 +30,16 @@ run it with \`npx convex dev --once\` to deploy the code.\`.
 `;
   } else {
     dbPrompt += `
-    You can use Convex in this environment, but there is no convex project connected yet.
+    You can use Convex in this environment, but you need to prompt the user to connect a project.
 
 If you need to persist data, run scheduled functions, query data, or subscribe to updates, ask the user to connect to a Convex deployment.
 
 If you need to install it, install with \`npm i convex@1.21.1-alpha.0 --force\` since 1.21.1-alpha.0 is a version known to work with this environment.
 
-IMPORTANT: Don't write any Convex code until the user has connected a project!
+IMPORTANT: If the user asks something that needs a database, ask the user to connect a convex project instead of choosing a different solution and going
+ahead with the code.
 
-Instead, suggest Convex and send something like this boltAction of type convex-connect.
-
-<boltArtifact>
-  <boltAction type="convex-connect">
-  </boltAction>
-</boltArtifact>
-
-You'll receive more instructions once the user has connected their Convex project
-so there's no need to take further action now.
+You'll receive more instructions once the user has connected their Convex project so there's no need to take further action now.
 
 `;
   }
@@ -123,5 +116,5 @@ The import path to import \`api\` from depends on the location of the file this 
 }
 
 /*
-${convexGuidelines}
-*/
+ *${convexGuidelines}
+ */

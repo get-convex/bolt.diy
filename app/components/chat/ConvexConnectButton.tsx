@@ -1,6 +1,11 @@
 import { classNames } from '~/utils/classNames';
 import { useState, useEffect } from 'react';
-import { convexProjectConnected, convexProjectToken } from '~/lib/stores/convex';
+import {
+  convexProjectConnected,
+  convexProjectDeploymentName,
+  convexProjectToken,
+  convexProjectDeploymentUrl,
+} from '~/lib/stores/convex';
 import { useStore } from '@nanostores/react';
 
 // The Convex OAuth App which is allowed to use the callbacks
@@ -41,14 +46,20 @@ export function ConvexConnectButton() {
     // Poll for token in local storage because COOP + COEP headers make postMessage more involved.
     const interval = setInterval(() => {
       const token = localStorage.getItem('convexProjectToken');
+      const deploymentName = localStorage.getItem('convexProjectDeploymentName');
+      const deploymentUrl = localStorage.getItem('convexProjectDeploymentUrl');
 
-      if (token) {
+      if (token && deploymentName && deploymentUrl) {
         clearInterval(interval);
         setPollInterval(null);
         setIsLoading(false);
         convexProjectConnected.set(true);
         convexProjectToken.set(token);
+        convexProjectDeploymentName.set(deploymentName);
+        convexProjectDeploymentUrl.set(deploymentUrl);
         localStorage.removeItem('convexProjectToken');
+        localStorage.removeItem('convexProjectDeploymentName');
+        localStorage.removeItem('convexProjectDeploymentUrl');
       }
     }, 500);
 

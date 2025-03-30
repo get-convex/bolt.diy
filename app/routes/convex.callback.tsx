@@ -1,10 +1,15 @@
 import { useEffect } from 'react';
 import { useSearchParams } from '@remix-run/react';
 
-interface TokenResponse {
-  token?: string;
-  error?: string;
-}
+type TokenResponse =
+  | {
+      token: string;
+      deploymentName: string;
+      deploymentUrl: string;
+    }
+  | {
+      error: string;
+    };
 
 export default function ConvexCallback() {
   const [searchParams] = useSearchParams();
@@ -23,8 +28,10 @@ export default function ConvexCallback() {
       .then((data: unknown) => {
         const tokenData = data as TokenResponse;
 
-        if (tokenData.token) {
+        if ('token' in tokenData) {
           localStorage.setItem('convexProjectToken', tokenData.token);
+          localStorage.setItem('convexProjectDeploymentName', tokenData.deploymentName);
+          localStorage.setItem('convexProjectDeploymentUrl', tokenData.deploymentUrl);
           window.close();
         } else {
           console.error('Failed to exchange code for token:', tokenData.error);

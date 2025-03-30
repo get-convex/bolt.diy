@@ -56,7 +56,7 @@ export const Dashboard = memo(() => {
       </div>
       <div className="flex-1 border-t border-bolt-elements-borderColor">
         {url !== null ? (
-          <iframe ref={iframeRef} className="border-none w-full h-full bg-white" src={url} sandbox="allow-scripts" />
+          <iframe ref={iframeRef} className="border-none w-full h-full bg-white" src={url} />
         ) : (
           <div className="flex w-full h-full justify-center items-center bg-white">
             No dashboard has been loaded so far

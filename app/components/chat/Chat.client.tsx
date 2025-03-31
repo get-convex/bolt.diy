@@ -120,7 +120,6 @@ export const ChatImpl = memo(
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
     const [imageDataList, setImageDataList] = useState<string[]>([]);
     const [searchParams, setSearchParams] = useSearchParams();
-    const [fakeLoading, setFakeLoading] = useState(false);
     const files = useStore(workbenchStore.files);
     const actionAlert = useStore(workbenchStore.alert);
     const convexProject = useStore(convexStore);
@@ -301,7 +300,6 @@ export const ChatImpl = memo(
       runAnimation();
 
       if (!chatStarted) {
-        setFakeLoading(true);
         setMessages([
           {
             id: `${new Date().getTime()}`,
@@ -319,7 +317,6 @@ export const ChatImpl = memo(
           },
         ]);
         reload();
-        setFakeLoading(false);
 
         return;
       }
@@ -423,7 +420,7 @@ export const ChatImpl = memo(
         input={input}
         showChat={showChat}
         chatStarted={chatStarted}
-        isStreaming={isLoading || fakeLoading}
+        isStreaming={isLoading}
         onStreamingChange={(streaming) => {
           streamingState.set(streaming);
         }}

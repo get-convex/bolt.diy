@@ -24,6 +24,8 @@ import { EditorPanel } from './EditorPanel';
 import { Preview } from './Preview';
 import useViewport from '~/lib/hooks';
 import { PushToGitHubDialog } from '~/components/@settings/tabs/connections/components/PushToGitHubDialog';
+import { Dashboard } from './Dashboard';
+import { convexStore } from '~/lib/stores/convex';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
@@ -36,21 +38,6 @@ interface WorkspaceProps {
 }
 
 const viewTransition = { ease: cubicEasingFn };
-
-const sliderOptions: SliderOptions<WorkbenchViewType> = {
-  left: {
-    value: 'code',
-    text: 'Code',
-  },
-  middle: {
-    value: 'diff',
-    text: 'Diff',
-  },
-  right: {
-    value: 'preview',
-    text: 'Preview',
-  },
-};
 
 const workbenchVariants = {
   closed: {
@@ -351,6 +338,29 @@ export const Workbench = memo(
       workbenchStore.currentView.set('diff');
     }, []);
 
+    const showDashboard = useStore(convexStore) !== null;
+
+    const sliderOptions: SliderOptions<WorkbenchViewType> = useMemo(
+      () => ({
+        options: [
+          {
+            value: 'code',
+            text: 'Code',
+          },
+          {
+            value: 'diff',
+            text: 'Diff',
+          },
+          {
+            value: 'preview',
+            text: 'Preview',
+          },
+          ...(showDashboard ? [{ value: 'dashboard' as const, text: 'Database' }] : []),
+        ],
+      }),
+      [showDashboard],
+    );
+
     return (
       chatStarted && (
         <motion.div
@@ -418,7 +428,7 @@ export const Workbench = memo(
                   />
                 </div>
                 <div className="relative flex-1 overflow-hidden">
-                  <View initial={{ x: '0%' }} animate={{ x: selectedView === 'code' ? '0%' : '-100%' }}>
+                  <View {...slidingPosition({ view: 'code', selectedView, showDashboard })}>
                     <EditorPanel
                       editorDocument={currentDocument}
                       isStreaming={isStreaming}
@@ -433,15 +443,17 @@ export const Workbench = memo(
                       onFileReset={onFileReset}
                     />
                   </View>
-                  <View
-                    initial={{ x: '100%' }}
-                    animate={{ x: selectedView === 'diff' ? '0%' : selectedView === 'code' ? '100%' : '-100%' }}
-                  >
+                  <View {...slidingPosition({ view: 'diff', selectedView, showDashboard })}>
                     <DiffView fileHistory={fileHistory} setFileHistory={setFileHistory} actionRunner={actionRunner} />
                   </View>
-                  <View initial={{ x: '100%' }} animate={{ x: selectedView === 'preview' ? '0%' : '100%' }}>
+                  <View {...slidingPosition({ view: 'preview', selectedView, showDashboard })}>
                     <Preview />
                   </View>
+                  {showDashboard && (
+                    <View {...slidingPosition({ view: 'dashboard', selectedView, showDashboard })}>
+                      <Dashboard />
+                    </View>
+                  )}
                 </div>
               </div>
             </div>
@@ -489,3 +501,30 @@ const View = memo(({ children, ...props }: ViewProps) => {
     </motion.div>
   );
 });
+
+function slidingPosition({
+  view,
+  selectedView,
+  showDashboard,
+}: {
+  view: WorkbenchViewType;
+  selectedView: WorkbenchViewType;
+  showDashboard: boolean;
+}) {
+  const tabsInOrder: WorkbenchViewType[] = [
+    'code',
+    'diff',
+    'preview',
+    ...(showDashboard ? ['dashboard' as const] : []),
+  ];
+
+  const viewIndex = tabsInOrder.indexOf(view);
+  const selectedViewIndex = tabsInOrder.indexOf(selectedView);
+
+  const position = { x: `${(viewIndex - selectedViewIndex) * 100}%` };
+
+  return {
+    initial: position,
+    animate: position,
+  } satisfies Partial<ViewProps>;
+}

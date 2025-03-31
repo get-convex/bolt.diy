@@ -12,7 +12,10 @@ import { getFilePaths } from './select-context';
 
 export type Messages = Message[];
 
-export type StreamingOptions = Omit<Parameters<typeof _streamText>[0], 'model'>;
+export interface StreamingOptions extends Omit<Parameters<typeof _streamText>[0], 'model'> {
+  convexProjectConnected: boolean;
+  convexProjectToken: string | null;
+}
 
 const logger = createScopedLogger('stream-text');
 
@@ -97,6 +100,10 @@ export async function streamText(props: {
       cwd: WORK_DIR,
       allowedHtmlElements: allowedHTMLElements,
       modificationTagName: MODIFICATIONS_TAG_NAME,
+      convex: {
+        isConnected: !!options?.convexProjectConnected,
+        projectToken: options?.convexProjectToken || null,
+      },
     }) ?? getSystemPrompt();
 
   if (files && contextFiles && contextOptimization) {

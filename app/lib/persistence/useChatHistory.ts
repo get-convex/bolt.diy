@@ -205,6 +205,7 @@ export const useChatHistoryConvex = () => {
   const [searchParams] = useSearchParams();
 
   const [initialMessages, setInitialMessages] = useState<SerializedMessage[]>([]);
+  const [ready, setReady] = useState<boolean>(false);
   const [urlId, setUrlId] = useState<string | undefined>();
   const convex = useConvex();
   const rawMessages = useQuery(api.messages.get, mixedId === undefined ? 'skip' : { id: mixedId });
@@ -221,6 +222,7 @@ export const useChatHistoryConvex = () => {
         description.set(rawMessages.description);
         chatId.set(rawMessages.externalId);
         chatMetadata.set(rawMessages.metadata);
+        setReady(true);
       } else {
         navigate('/', { replace: true });
       }
@@ -228,7 +230,7 @@ export const useChatHistoryConvex = () => {
   }, [rawMessages]);
 
   return {
-    ready: mixedId !== undefined,
+    ready: mixedId === undefined || ready,
     initialMessages: initialMessages.map(deserializeMessageForConvex),
     updateChatMestaData: async (metadata: IChatMetadata) => {
       const id = chatId.get();

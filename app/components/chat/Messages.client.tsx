@@ -4,14 +4,15 @@ import { classNames } from '~/utils/classNames';
 import { AssistantMessage } from './AssistantMessage';
 import { UserMessage } from './UserMessage';
 import { useLocation } from '@remix-run/react';
-import { db, chatId } from '~/lib/persistence/useChatHistory';
-import { forkChat } from '~/lib/persistence/db';
+import { chatId } from '~/lib/persistence/useChatHistory';
 import { toast } from 'react-toastify';
 import WithTooltip from '~/components/ui/Tooltip';
 import { useStore } from '@nanostores/react';
 import { profileStore } from '~/lib/stores/profile';
 import { forwardRef } from 'react';
 import type { ForwardedRef } from 'react';
+import { useConvex } from 'convex/react';
+import { api } from '@convex/_generated/api';
 
 interface MessagesProps {
   id?: string;
@@ -25,6 +26,7 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
     const { id, isStreaming = false, messages = [] } = props;
     const location = useLocation();
     const profile = useStore(profileStore);
+    const convex = useConvex();
 
     const handleRewind = (messageId: string) => {
       const searchParams = new URLSearchParams(location.search);
@@ -34,12 +36,12 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
 
     const handleFork = async (messageId: string) => {
       try {
-        if (!db || !chatId.get()) {
+        if (!chatId.get()) {
           toast.error('Chat persistence is not available');
           return;
         }
 
-        const urlId = await forkChat(db, chatId.get()!, messageId);
+        const urlId = await convex.mutation(api.messages.fork, { id: chatId.get()!, messageId });
         window.location.href = `/chat/${urlId}`;
       } catch (error) {
         toast.error('Failed to fork chat: ' + (error as Error).message);

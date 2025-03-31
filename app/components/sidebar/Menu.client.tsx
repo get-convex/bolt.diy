@@ -5,14 +5,7 @@ import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 import { ControlPanel } from '~/components/@settings/core/ControlPanel';
 import { SettingsButton } from '~/components/ui/SettingsButton';
-import {
-  db,
-  deleteById,
-  chatId,
-  type ChatHistoryItem,
-  useChatHistoryConvex,
-  type ChatHistoryItemConvex,
-} from '~/lib/persistence';
+import { chatId, useChatHistoryConvex, type ChatHistoryItemConvex } from '~/lib/persistence';
 import { cubicEasingFn } from '~/utils/easings';
 import { logger } from '~/utils/logger';
 import { HistoryItem } from './HistoryItem';
@@ -21,7 +14,7 @@ import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
 import { classNames } from '~/utils/classNames';
 import { useStore } from '@nanostores/react';
 import { profileStore } from '~/lib/stores/profile';
-import { useQuery } from 'convex/react';
+import { useConvex, useQuery } from 'convex/react';
 import { api } from '@convex/_generated/api';
 
 const menuVariants = {
@@ -72,7 +65,7 @@ function CurrentDateTime() {
 export const Menu = () => {
   const { duplicateCurrentChat, exportChat } = useChatHistoryConvex();
   const menuRef = useRef<HTMLDivElement>(null);
-  // const [list, setList] = useState<ChatHistoryItem[]>([]);
+  const convex = useConvex();
   const list = useQuery(api.messages.getAll) ?? [];
   const [open, setOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
@@ -83,25 +76,24 @@ export const Menu = () => {
     items: list,
     searchFields: ['description'],
   });
-  console.log('#### filteredList', filteredList);
 
   const deleteItem = useCallback((event: React.UIEvent, item: ChatHistoryItemConvex) => {
     event.preventDefault();
 
-    // xcxc start
-    // if (db) {
-    //   deleteById(db, item.externalId)
-    //     .then(() => {
-    //       if (chatId.get() === item.externalId) {
-    //         // hard page navigation to clear the stores
-    //         window.location.pathname = '/';
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       toast.error('Failed to delete conversation');
-    //       logger.error(error);
-    //     });
-    // }
+    if (convex) {
+      convex
+        .mutation(api.messages.remove, { id: item.externalId })
+        .then(() => {
+          if (chatId.get() === item.externalId) {
+            // hard page navigation to clear the stores
+            window.location.pathname = '/';
+          }
+        })
+        .catch((error) => {
+          toast.error('Failed to delete conversation');
+          logger.error(error);
+        });
+    }
   }, []);
 
   const closeDialog = () => {

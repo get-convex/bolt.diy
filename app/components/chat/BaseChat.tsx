@@ -306,7 +306,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         }
       }
     };
-    console.log('#### BaseChat messages showChat chatStarted', messages, showChat, chatStarted);
 
     const baseChat = (
       <div

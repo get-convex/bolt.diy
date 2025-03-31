@@ -2,7 +2,8 @@ import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { DialogRoot, DialogClose, Dialog, DialogTitle } from '~/components/ui/Dialog';
-import { db, getAll, deleteById } from '~/lib/persistence';
+import { useConvex } from 'convex/react';
+import { api } from '@convex/_generated/api';
 
 export default function DataTab() {
   const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
@@ -13,15 +14,15 @@ export default function DataTab() {
   const [showDeleteInlineConfirm, setShowDeleteInlineConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const apiKeyFileInputRef = useRef<HTMLInputElement>(null);
+  const convex = useConvex();
 
   const handleExportAllChats = async () => {
     try {
-      if (!db) {
-        throw new Error('Database not initialized');
-      }
-
-      // Get all chats from IndexedDB
-      const allChats = await getAll(db);
+      /*
+       * TODO(sarah) -- this could probably be done via Convex storage / might
+       * be better as an action
+       */
+      const allChats = await convex.query(api.messages.getAll);
       const exportData = {
         chats: allChats,
         exportDate: new Date().toISOString(),
@@ -185,15 +186,8 @@ export default function DataTab() {
       localStorage.removeItem('bolt_settings');
       localStorage.removeItem('bolt_chat_history');
 
-      // Clear all data from IndexedDB
-      if (!db) {
-        throw new Error('Database not initialized');
-      }
-
-      // Get all chats and delete them
-      const chats = await getAll(db as IDBDatabase);
-      const deletePromises = chats.map((chat) => deleteById(db as IDBDatabase, chat.id));
-      await Promise.all(deletePromises);
+      // Delete all chats
+      await convex.mutation(api.messages.deleteAll);
 
       // Close the dialog first
       setShowResetInlineConfirm(false);
@@ -217,15 +211,8 @@ export default function DataTab() {
       // Clear chat history from localStorage
       localStorage.removeItem('bolt_chat_history');
 
-      // Clear chats from IndexedDB
-      if (!db) {
-        throw new Error('Database not initialized');
-      }
-
-      // Get all chats and delete them one by one
-      const chats = await getAll(db as IDBDatabase);
-      const deletePromises = chats.map((chat) => deleteById(db as IDBDatabase, chat.id));
-      await Promise.all(deletePromises);
+      // Delete all chats
+      await convex.mutation(api.messages.deleteAll);
 
       // Close the dialog first
       setShowDeleteInlineConfirm(false);

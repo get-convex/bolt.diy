@@ -9,7 +9,7 @@ import { LoadingOverlay } from '~/components/ui/LoadingOverlay';
 import { RepositorySelectionDialog } from '~/components/@settings/tabs/connections/components/RepositorySelectionDialog';
 import { classNames } from '~/utils/classNames';
 import { Button } from '~/components/ui/Button';
-import type { IChatMetadata } from '~/lib/persistence/db';
+import type { IChatMetadata } from '~/lib/persistence/useChatHistory';
 
 const IGNORE_PATTERNS = [
   'node_modules/**',

@@ -1,9 +1,9 @@
 import { format, isAfter, isThisWeek, isThisYear, isToday, isYesterday, subDays } from 'date-fns';
-import type { ChatHistoryItem } from '~/lib/persistence';
+import type { ChatHistoryItemConvex } from '~/lib/persistence';
 
-type Bin = { category: string; items: ChatHistoryItem[] };
+type Bin = { category: string; items: ChatHistoryItemConvex[] };
 
-export function binDates(_list: ChatHistoryItem[]) {
+export function binDates(_list: ChatHistoryItemConvex[]) {
   const list = _list.toSorted((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp));
 
   const binLookup: Record<string, Bin> = {};

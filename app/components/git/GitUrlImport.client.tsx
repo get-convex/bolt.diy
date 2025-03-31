@@ -6,7 +6,7 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { BaseChat } from '~/components/chat/BaseChat';
 import { Chat } from '~/components/chat/Chat.client';
 import { useGit } from '~/lib/hooks/useGit';
-import { useChatHistory } from '~/lib/persistence';
+import { useChatHistoryConvex } from '~/lib/persistence';
 import { createCommandsMessage, detectProjectCommands, escapeBoltTags } from '~/utils/projectCommands';
 import { LoadingOverlay } from '~/components/ui/LoadingOverlay';
 import { toast } from 'react-toastify';
@@ -37,7 +37,7 @@ const IGNORE_PATTERNS = [
 
 export function GitUrlImport() {
   const [searchParams] = useSearchParams();
-  const { ready: historyReady, importChat } = useChatHistory();
+  const { ready: historyReady, importChat } = useChatHistoryConvex();
   const { ready: gitReady, gitClone } = useGit();
   const [imported, setImported] = useState(false);
   const [loading, setLoading] = useState(true);

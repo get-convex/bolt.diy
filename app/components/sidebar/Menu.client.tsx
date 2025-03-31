@@ -5,7 +5,14 @@ import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 import { ControlPanel } from '~/components/@settings/core/ControlPanel';
 import { SettingsButton } from '~/components/ui/SettingsButton';
-import { db, deleteById, getAll, chatId, type ChatHistoryItem, useChatHistory } from '~/lib/persistence';
+import {
+  db,
+  deleteById,
+  chatId,
+  type ChatHistoryItem,
+  useChatHistoryConvex,
+  type ChatHistoryItemConvex,
+} from '~/lib/persistence';
 import { cubicEasingFn } from '~/utils/easings';
 import { logger } from '~/utils/logger';
 import { HistoryItem } from './HistoryItem';
@@ -14,6 +21,8 @@ import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
 import { classNames } from '~/utils/classNames';
 import { useStore } from '@nanostores/react';
 import { profileStore } from '~/lib/stores/profile';
+import { useQuery } from 'convex/react';
+import { api } from '@convex/_generated/api';
 
 const menuVariants = {
   closed: {
@@ -36,7 +45,7 @@ const menuVariants = {
   },
 } satisfies Variants;
 
-type DialogContent = { type: 'delete'; item: ChatHistoryItem } | null;
+type DialogContent = { type: 'delete'; item: ChatHistoryItemConvex } | null;
 
 function CurrentDateTime() {
   const [dateTime, setDateTime] = useState(new Date());
@@ -61,9 +70,10 @@ function CurrentDateTime() {
 }
 
 export const Menu = () => {
-  const { duplicateCurrentChat, exportChat } = useChatHistory();
+  const { duplicateCurrentChat, exportChat } = useChatHistoryConvex();
   const menuRef = useRef<HTMLDivElement>(null);
-  const [list, setList] = useState<ChatHistoryItem[]>([]);
+  // const [list, setList] = useState<ChatHistoryItem[]>([]);
+  const list = useQuery(api.messages.getAll) ?? [];
   const [open, setOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -73,45 +83,30 @@ export const Menu = () => {
     items: list,
     searchFields: ['description'],
   });
+  console.log('#### filteredList', filteredList);
 
-  const loadEntries = useCallback(() => {
-    if (db) {
-      getAll(db)
-        .then((list) => list.filter((item) => item.urlId && item.description))
-        .then(setList)
-        .catch((error) => toast.error(error.message));
-    }
-  }, []);
-
-  const deleteItem = useCallback((event: React.UIEvent, item: ChatHistoryItem) => {
+  const deleteItem = useCallback((event: React.UIEvent, item: ChatHistoryItemConvex) => {
     event.preventDefault();
 
-    if (db) {
-      deleteById(db, item.id)
-        .then(() => {
-          loadEntries();
-
-          if (chatId.get() === item.id) {
-            // hard page navigation to clear the stores
-            window.location.pathname = '/';
-          }
-        })
-        .catch((error) => {
-          toast.error('Failed to delete conversation');
-          logger.error(error);
-        });
-    }
+    // xcxc start
+    // if (db) {
+    //   deleteById(db, item.externalId)
+    //     .then(() => {
+    //       if (chatId.get() === item.externalId) {
+    //         // hard page navigation to clear the stores
+    //         window.location.pathname = '/';
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       toast.error('Failed to delete conversation');
+    //       logger.error(error);
+    //     });
+    // }
   }, []);
 
   const closeDialog = () => {
     setDialogContent(null);
   };
-
-  useEffect(() => {
-    if (open) {
-      loadEntries();
-    }
-  }, [open]);
 
   useEffect(() => {
     const enterThreshold = 40;
@@ -138,14 +133,14 @@ export const Menu = () => {
     };
   }, [isSettingsOpen]);
 
-  const handleDeleteClick = (event: React.UIEvent, item: ChatHistoryItem) => {
+  const handleDeleteClick = (event: React.UIEvent, item: ChatHistoryItemConvex) => {
     event.preventDefault();
     setDialogContent({ type: 'delete', item });
   };
 
   const handleDuplicate = async (id: string) => {
     await duplicateCurrentChat(id);
-    loadEntries(); // Reload the list after duplication
+    // loadEntries(); // Reload the list after duplication
   };
 
   const handleSettingsClick = () => {
@@ -232,11 +227,11 @@ export const Menu = () => {
                   <div className="space-y-0.5 pr-1">
                     {items.map((item) => (
                       <HistoryItem
-                        key={item.id}
+                        key={item.externalId}
                         item={item}
                         exportChat={exportChat}
                         onDelete={(event) => handleDeleteClick(event, item)}
-                        onDuplicate={() => handleDuplicate(item.id)}
+                        onDuplicate={() => handleDuplicate(item.externalId)}
                       />
                     ))}
                   </div>

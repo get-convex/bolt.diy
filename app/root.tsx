@@ -1,20 +1,26 @@
 import { useStore } from '@nanostores/react';
 import type { LinksFunction } from '@remix-run/cloudflare';
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
+import { json, Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react';
 import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
 import { themeStore } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
 import { createHead } from 'remix-island';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ClientOnly } from 'remix-utils/client-only';
+import { ConvexProvider } from 'convex/react';
 
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
 import xtermStyles from '@xterm/xterm/css/xterm.css?url';
 
 import 'virtual:uno.css';
+
+export async function loader() {
+  const CONVEX_URL = process.env.CONVEX_URL;
+  return json({ ENV: { CONVEX_URL } });
+}
 
 export const links: LinksFunction = () => [
   {
@@ -67,6 +73,8 @@ export const Head = createHead(() => (
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const theme = useStore(themeStore);
+  const { ENV } = useLoaderData<typeof loader>();
+  const [convex] = useState(() => new ConvexReactClient(ENV.CONVEX_URL!));
 
   useEffect(() => {
     document.querySelector('html')?.setAttribute('data-theme', theme);
@@ -74,7 +82,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <ClientOnly>{() => <DndProvider backend={HTML5Backend}>{children}</DndProvider>}</ClientOnly>
+      <ClientOnly>
+        {() => (
+          <DndProvider backend={HTML5Backend}>
+            <ConvexProvider client={convex}>{children}</ConvexProvider>
+          </DndProvider>
+        )}
+      </ClientOnly>
       <ScrollRestoration />
       <Scripts />
     </>
@@ -82,6 +96,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 import { logStore } from './lib/stores/logs';
+import { ConvexReactClient } from 'convex/react';
 
 export default function App() {
   const theme = useStore(themeStore);

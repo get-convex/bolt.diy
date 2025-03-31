@@ -153,10 +153,17 @@ export class PreviewsStore {
 
     try {
       // Watch for file changes
-      const watcher = await webcontainer.fs.watch('**/*', { persistent: true });
+      webcontainer.fs.watch('', { persistent: true, recursive: true }, (event, path) => {
+        if (typeof path !== 'string') {
+          return;
+        }
 
-      // Use the native watch events
-      (watcher as any).addEventListener('change', async () => {
+        if (path.startsWith('node_modules/')) {
+          return;
+        }
+
+        console.log('[Preview] File changed:', event, path);
+
         const previews = this.previews.get();
 
         for (const preview of previews) {

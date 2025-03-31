@@ -125,7 +125,7 @@ export const ChatImpl = memo(
     const files = useStore(workbenchStore.files);
     const actionAlert = useStore(workbenchStore.alert);
     const convexProject = useStore(convexStore);
-    const { activeProviders, promptId, autoSelectTemplate, contextOptimizationEnabled } = useSettings();
+    const { activeProviders, promptId, autoSelectTemplate } = useSettings();
 
     const [model, setModel] = useState(() => {
       const savedModel = Cookies.get('selectedModel');
@@ -161,7 +161,6 @@ export const ChatImpl = memo(
         apiKeys,
         files,
         promptId,
-        contextOptimization: contextOptimizationEnabled,
         convex: {
           isConnected: convexProject !== null,
           projectToken: convexProject?.token,

@@ -27,7 +27,6 @@ export async function streamText(props: {
   files?: FileMap;
   providerSettings?: Record<string, IProviderSetting>;
   promptId?: string;
-  contextOptimization?: boolean;
   contextFiles?: FileMap;
   summary?: string;
   messageSliceId?: number;
@@ -40,7 +39,6 @@ export async function streamText(props: {
     files,
     providerSettings,
     promptId,
-    contextOptimization,
     contextFiles,
     summary,
   } = props;
@@ -106,7 +104,7 @@ export async function streamText(props: {
       },
     }) ?? getSystemPrompt();
 
-  if (files && contextFiles && contextOptimization) {
+  if (files && contextFiles) {
     const codeContext = createFilesContext(contextFiles, true);
     const filePaths = getFilePaths(files);
 

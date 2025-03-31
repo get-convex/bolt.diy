@@ -19,7 +19,6 @@ export async function selectContext(props: {
   files: FileMap;
   providerSettings?: Record<string, IProviderSetting>;
   promptId?: string;
-  contextOptimization?: boolean;
   summary: string;
   onFinish?: (resp: GenerateTextResult<Record<string, CoreTool<any, any>>, never>) => void;
 }) {

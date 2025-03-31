@@ -6,14 +6,12 @@ import {
   providersStore,
   latestBranchStore,
   autoSelectStarterTemplate,
-  enableContextOptimizationStore,
   tabConfigurationStore,
   updateTabConfiguration as updateTabConfig,
   resetTabConfiguration as resetTabConfig,
   updateProviderSettings as updateProviderSettingsStore,
   updateLatestBranch,
   updateAutoSelectTemplate,
-  updateContextOptimization,
   updateEventLogs,
   updatePromptId,
 } from '~/lib/stores/settings';
@@ -57,8 +55,6 @@ export interface UseSettingsReturn {
   enableLatestBranch: (enabled: boolean) => void;
   autoSelectTemplate: boolean;
   setAutoSelectTemplate: (enabled: boolean) => void;
-  contextOptimizationEnabled: boolean;
-  enableContextOptimization: (enabled: boolean) => void;
 
   // Tab configuration
   tabConfiguration: TabWindowConfig;
@@ -79,7 +75,6 @@ export function useSettings(): UseSettingsReturn {
   const isLatestBranch = useStore(latestBranchStore);
   const autoSelectTemplate = useStore(autoSelectStarterTemplate);
   const [activeProviders, setActiveProviders] = useState<ProviderInfo[]>([]);
-  const contextOptimizationEnabled = useStore(enableContextOptimizationStore);
   const tabConfiguration = useStore(tabConfigurationStore);
   const [settings, setSettings] = useState<Settings>(() => {
     const storedSettings = getLocalStorage('settings');
@@ -140,11 +135,6 @@ export function useSettings(): UseSettingsReturn {
     logStore.logSystem(`Auto select template ${enabled ? 'enabled' : 'disabled'}`);
   }, []);
 
-  const enableContextOptimization = useCallback((enabled: boolean) => {
-    updateContextOptimization(enabled);
-    logStore.logSystem(`Context optimization ${enabled ? 'enabled' : 'disabled'}`);
-  }, []);
-
   const setTheme = useCallback(
     (theme: Settings['theme']) => {
       saveSettings({ theme });
@@ -197,8 +187,6 @@ export function useSettings(): UseSettingsReturn {
     enableLatestBranch,
     autoSelectTemplate,
     setAutoSelectTemplate,
-    contextOptimizationEnabled,
-    enableContextOptimization,
     setTheme,
     setLanguage,
     setNotifications,

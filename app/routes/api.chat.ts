@@ -37,11 +37,10 @@ function parseCookies(cookieHeader: string): Record<string, string> {
 }
 
 async function chatAction({ context, request }: ActionFunctionArgs) {
-  const { messages, files, promptId, contextOptimization, convex } = await request.json<{
+  const { messages, files, promptId, convex } = await request.json<{
     messages: Messages;
     files: any;
     promptId?: string;
-    contextOptimization: boolean;
     convex?: {
       isConnected: boolean;
       projectToken: string | undefined;
@@ -81,7 +80,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
           messageSliceId = messages.length - 3;
         }
 
-        if (filePaths.length > 0 && contextOptimization) {
+        if (filePaths.length > 0) {
           logger.debug('Generating Chat Summary');
           dataStream.writeData({
             type: 'progress',
@@ -100,7 +99,6 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
             apiKeys,
             providerSettings,
             promptId,
-            contextOptimization,
             onFinish(resp) {
               if (resp.usage) {
                 logger.debug('createSummary token usage', JSON.stringify(resp.usage));
@@ -143,7 +141,6 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
             files,
             providerSettings,
             promptId,
-            contextOptimization,
             summary,
             onFinish(resp) {
               if (resp.usage) {
@@ -244,7 +241,6 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
               files,
               providerSettings,
               promptId,
-              contextOptimization,
               contextFiles: filteredFiles,
               summary,
               messageSliceId,
@@ -283,7 +279,6 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
           files,
           providerSettings,
           promptId,
-          contextOptimization,
           contextFiles: filteredFiles,
           summary,
           messageSliceId,

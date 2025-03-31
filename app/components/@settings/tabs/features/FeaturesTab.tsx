@@ -109,11 +109,9 @@ export default function FeaturesTab() {
   const {
     autoSelectTemplate,
     isLatestBranch,
-    contextOptimizationEnabled,
     eventLogs,
     setAutoSelectTemplate,
     enableLatestBranch,
-    enableContextOptimization,
     setEventLogs,
     setPromptId,
     promptId,
@@ -124,10 +122,6 @@ export default function FeaturesTab() {
     // Only set defaults if values are undefined
     if (isLatestBranch === undefined) {
       enableLatestBranch(false); // Default: OFF - Don't auto-update from main branch
-    }
-
-    if (contextOptimizationEnabled === undefined) {
-      enableContextOptimization(true); // Default: ON - Enable context optimization
     }
 
     if (autoSelectTemplate === undefined) {
@@ -158,12 +152,6 @@ export default function FeaturesTab() {
           break;
         }
 
-        case 'contextOptimization': {
-          enableContextOptimization(enabled);
-          toast.success(`Context optimization ${enabled ? 'enabled' : 'disabled'}`);
-          break;
-        }
-
         case 'eventLogs': {
           setEventLogs(enabled);
           toast.success(`Event logging ${enabled ? 'enabled' : 'disabled'}`);
@@ -174,7 +162,7 @@ export default function FeaturesTab() {
           break;
       }
     },
-    [enableLatestBranch, setAutoSelectTemplate, enableContextOptimization, setEventLogs],
+    [enableLatestBranch, setAutoSelectTemplate, setEventLogs],
   );
 
   const features = {
@@ -194,14 +182,6 @@ export default function FeaturesTab() {
         icon: 'i-ph:selection',
         enabled: autoSelectTemplate,
         tooltip: 'Enabled by default to automatically select the most appropriate starter template',
-      },
-      {
-        id: 'contextOptimization',
-        title: 'Context Optimization',
-        description: 'Optimize context for better responses',
-        icon: 'i-ph:brain',
-        enabled: contextOptimizationEnabled,
-        tooltip: 'Enabled by default for improved AI responses',
       },
       {
         id: 'eventLogs',

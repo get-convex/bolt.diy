@@ -5,13 +5,11 @@ import {
   promptStore,
   providersStore,
   latestBranchStore,
-  autoSelectStarterTemplate,
   tabConfigurationStore,
   updateTabConfiguration as updateTabConfig,
   resetTabConfiguration as resetTabConfig,
   updateProviderSettings as updateProviderSettingsStore,
   updateLatestBranch,
-  updateAutoSelectTemplate,
   updateEventLogs,
   updatePromptId,
 } from '~/lib/stores/settings';
@@ -53,8 +51,6 @@ export interface UseSettingsReturn {
   setPromptId: (promptId: string) => void;
   isLatestBranch: boolean;
   enableLatestBranch: (enabled: boolean) => void;
-  autoSelectTemplate: boolean;
-  setAutoSelectTemplate: (enabled: boolean) => void;
 
   // Tab configuration
   tabConfiguration: TabWindowConfig;
@@ -73,7 +69,6 @@ export function useSettings(): UseSettingsReturn {
   const eventLogs = useStore(isEventLogsEnabled);
   const promptId = useStore(promptStore);
   const isLatestBranch = useStore(latestBranchStore);
-  const autoSelectTemplate = useStore(autoSelectStarterTemplate);
   const [activeProviders, setActiveProviders] = useState<ProviderInfo[]>([]);
   const tabConfiguration = useStore(tabConfigurationStore);
   const [settings, setSettings] = useState<Settings>(() => {
@@ -130,11 +125,6 @@ export function useSettings(): UseSettingsReturn {
     logStore.logSystem(`Main branch updates ${enabled ? 'enabled' : 'disabled'}`);
   }, []);
 
-  const setAutoSelectTemplate = useCallback((enabled: boolean) => {
-    updateAutoSelectTemplate(enabled);
-    logStore.logSystem(`Auto select template ${enabled ? 'enabled' : 'disabled'}`);
-  }, []);
-
   const setTheme = useCallback(
     (theme: Settings['theme']) => {
       saveSettings({ theme });
@@ -185,8 +175,6 @@ export function useSettings(): UseSettingsReturn {
     setPromptId,
     isLatestBranch,
     enableLatestBranch,
-    autoSelectTemplate,
-    setAutoSelectTemplate,
     setTheme,
     setLanguage,
     setNotifications,

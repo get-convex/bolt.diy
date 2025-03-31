@@ -22,7 +22,6 @@ import { useSettings } from '~/lib/hooks/useSettings';
 import type { ProviderInfo } from '~/types/model';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
-import { getTemplates, selectStarterTemplate } from '~/utils/selectStarterTemplate';
 import { logStore } from '~/lib/stores/logs';
 import { streamingState } from '~/lib/stores/streaming';
 import { filesToArtifacts } from '~/utils/fileUtils';
@@ -125,7 +124,7 @@ export const ChatImpl = memo(
     const files = useStore(workbenchStore.files);
     const actionAlert = useStore(workbenchStore.alert);
     const convexProject = useStore(convexStore);
-    const { activeProviders, promptId, autoSelectTemplate } = useSettings();
+    const { activeProviders, promptId } = useSettings();
 
     const [model, setModel] = useState(() => {
       const savedModel = Cookies.get('selectedModel');
@@ -202,21 +201,21 @@ export const ChatImpl = memo(
     useEffect(() => {
       const prompt = searchParams.get('prompt');
 
-      // console.log(prompt, searchParams, model, provider);
-
-      if (prompt) {
-        setSearchParams({});
-        runAnimation();
-        append({
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `[Model: ${model}]\n\n[Provider: ${provider.name}]\n\n${prompt}`,
-            },
-          ] as any, // Type assertion to bypass compiler check
-        });
+      if (!prompt) {
+        return;
       }
+
+      setSearchParams({});
+      runAnimation();
+      append({
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: `[Model: ${model}]\n\n[Provider: ${provider.name}]\n\n${prompt}`,
+          },
+        ] as any, // Type assertion to bypass compiler check
+      });
     }, [model, provider, searchParams]);
 
     const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer();
@@ -303,54 +302,6 @@ export const ChatImpl = memo(
 
       if (!chatStarted) {
         setFakeLoading(true);
-
-        if (autoSelectTemplate) {
-          const { template, title } = await selectStarterTemplate({
-            message: messageContent,
-            model,
-            provider,
-          });
-
-          if (template !== 'blank') {
-            const temResp = await getTemplates(template, title).catch((e) => {
-              if (e.message.includes('rate limit')) {
-                toast.warning('Rate limit exceeded. Skipping starter template\n Continuing with blank template');
-              } else {
-                toast.warning('Failed to import starter template\n Continuing with blank template');
-              }
-
-              return null;
-            });
-
-            if (temResp) {
-              const { assistantMessage, userMessage } = temResp;
-              setMessages([
-                {
-                  id: `1-${new Date().getTime()}`,
-                  role: 'user',
-                  content: messageContent,
-                },
-                {
-                  id: `2-${new Date().getTime()}`,
-                  role: 'assistant',
-                  content: assistantMessage,
-                },
-                {
-                  id: `3-${new Date().getTime()}`,
-                  role: 'user',
-                  content: `[Model: ${model}]\n\n[Provider: ${provider.name}]\n\n${userMessage}`,
-                  annotations: ['hidden'],
-                },
-              ]);
-              reload();
-              setFakeLoading(false);
-
-              return;
-            }
-          }
-        }
-
-        // If autoSelectTemplate is disabled or template selection failed, proceed with normal message
         setMessages([
           {
             id: `${new Date().getTime()}`,

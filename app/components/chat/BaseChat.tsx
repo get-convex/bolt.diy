@@ -28,7 +28,6 @@ import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
 import type { ProviderInfo } from '~/types/model';
 import { ScreenshotStateManager } from './ScreenshotStateManager';
 import { toast } from 'react-toastify';
-import StarterTemplates from './StarterTemplates';
 import type { ActionAlert } from '~/types/actions';
 import ChatAlert from './ChatAlert';
 import type { ModelInfo } from '~/lib/modules/llm/types';
@@ -611,7 +610,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
                   handleSendMessage?.(event, messageInput);
                 })}
-              {!chatStarted && <StarterTemplates />}
             </div>
           </div>
           <ClientOnly>

@@ -47,6 +47,8 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
     };
   }>();
 
+  console.log(messages, files, promptId, convex);
+
   const cookieHeader = request.headers.get('Cookie');
   const apiKeys = JSON.parse(parseCookies(cookieHeader || '').apiKeys || '{}');
   const providerSettings: Record<string, IProviderSetting> = JSON.parse(

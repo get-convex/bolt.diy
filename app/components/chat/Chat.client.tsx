@@ -212,7 +212,7 @@ export const ChatImpl = memo(
         content: [
           {
             type: 'text',
-            text: `[Model: ${model}]\n\n[Provider: ${provider.name}]\n\n${prompt}`,
+            text: prompt,
           },
         ] as any, // Type assertion to bypass compiler check
       });
@@ -309,7 +309,7 @@ export const ChatImpl = memo(
             content: [
               {
                 type: 'text',
-                text: `[Model: ${model}]\n\n[Provider: ${provider.name}]\n\n${messageContent}`,
+                text: messageContent,
               },
               ...imageDataList.map((imageData) => ({
                 type: 'image',
@@ -339,7 +339,7 @@ export const ChatImpl = memo(
           content: [
             {
               type: 'text',
-              text: `[Model: ${model}]\n\n[Provider: ${provider.name}]\n\n${userUpdateArtifact}${messageContent}`,
+              text: `${userUpdateArtifact}${messageContent}`,
             },
             ...imageDataList.map((imageData) => ({
               type: 'image',
@@ -355,7 +355,7 @@ export const ChatImpl = memo(
           content: [
             {
               type: 'text',
-              text: `[Model: ${model}]\n\n[Provider: ${provider.name}]\n\n${messageContent}`,
+              text: messageContent,
             },
             ...imageDataList.map((imageData) => ({
               type: 'image',

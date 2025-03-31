@@ -2,7 +2,6 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import { MODEL_REGEX, PROVIDER_REGEX } from '~/utils/constants';
 import { Markdown } from './Markdown';
 
 interface UserMessageProps {
@@ -44,5 +43,5 @@ export function UserMessage({ content }: UserMessageProps) {
 
 function stripMetadata(content: string) {
   const artifactRegex = /<boltArtifact\s+[^>]*>[\s\S]*?<\/boltArtifact>/gm;
-  return content.replace(MODEL_REGEX, '').replace(PROVIDER_REGEX, '').replace(artifactRegex, '');
+  return content.replace(artifactRegex, '');
 }
